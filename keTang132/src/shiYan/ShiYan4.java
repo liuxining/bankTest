@@ -14,19 +14,21 @@ import java.util.Scanner;
 public class ShiYan4 {
 	public static void main(String[] args) throws IOException {
 
-		File f1 = new File("D:\\EmbededFinally.java");
-		f1.createNewFile();
+		File f1 = new File("G:\\test\\fenge.java");
+		System.out.println(f1.getParent());
+		File f2 = new File(f1.getName() + "123");
+		f2.mkdirs();
 		Scanner scan = new Scanner(System.in);
 		char ch = 'y';
 		int s;
 		while(ch == 'y') {
 			System.out.println("\t\t1、计算文件大小");
-			System.out.println("\t\t2、加密");
-			System.out.println("\t\t3、解密");
-			System.out.println("\t\t4、分割文件");
-			System.out.println("\t\t5、合并文件");
-			System.out.println("\t\t6、压缩文件");
-			System.out.println("\t\t7、解压文件");
+			System.out.println("\t\t2、文件加密");
+			System.out.println("\t\t3、文件解密");
+			System.out.println("\t\t4、文件分割");
+			System.out.println("\t\t5、文件合并");
+			System.out.println("\t\t6、文件打包");
+			System.out.println("\t\t7、文件解包");
 			System.out.println("\t\t0、退出");
 			s = scan.nextInt();
 			switch(s) {
@@ -46,61 +48,82 @@ public class ShiYan4 {
 				break;
 			}
 			case 3:{
-				
+				System.out.println("请输入要解密的文件或目录名");
+				String yuanFileName = scan.next();
+				System.out.println("请输入解密后的文件或目录名");
+				String resultFileName = scan.next();
+				jieMi(new File(yuanFileName),new File(resultFileName));
+				System.out.println("解密完成");
+				break;
+			}
+			case 4:{
+				//分割文件
+				System.out.println("请输入要分割的文件名");
+				String fileName = scan.next();
+				File fy = new File(fileName);
+				fenGe(fy);
+				System.out.println("文件 " + fy.getName() + " 分割完成,存储位置为： " + fy.getParent() + "\\" + fy.getName().substring(0,fy.getName().indexOf(".")) + "_fenGe 目录中");
+				break;
+			}
+			case 5:{
+				//合并文件
+				System.out.println("请输入要合并的文件所在的目录名");
+				File fy = new File(scan.next());
+				System.out.println("请输入合并后的文件的位置");
+				File fn = new File(scan.next());
+				heBing(fy.listFiles(), fn);;
+				System.out.println("文件夹  " + fy.getAbsolutePath() + " 中的文件合并完成,合并后的文件为： " + fn.getAbsolutePath());
+				break;
+			}
+			case 6:{
+				//打包文件
+				daBaoFrame(scan);
+				break;
+			}
+			case 7:{
+				jieBaoFrame(scan);
+				break;
+			}
+			case 0:{
+				ch = 'n';
+				break;
+			}
+			default:{
+				System.out.println("输入错误！");
+				break;
 			}
 			}
 		}
-//		System.out.println("请输入要计算大小的文件名");
-//		String sizeName = scan.next();
-//		System.out.println(sizeName + " 文件大小为： " + fileSize(new File(sizeName)));
-//		
-//		
-//		jieMi(new File(sizeName),new File(sizeName));
-//		scan.close();
-//		fenGe(new File("DataFileTest.java"));
-//		
-//		File[] fy = new File[40];
-//		for(int i = 1;i <= 40;i++){
-//			fy[i - 1] = new File("DataFileTest.java-" + i + ".dat");
-//		}
-//		
-////		heBing(fy,new File("DataFileTestHeBing.dat"));
-//		yaSuoFrame(scan);
-//		jieYaFrame(scan);
 	}
 	
-	public static void yaSuoFrame(Scanner scan) throws IOException {
-		File[] fy = new File("G:\\javaceshi2").listFiles();
-		System.out.println(fy.length);
-//		System.out.println("请输入目标文件名：");
-//		String muBiao = scan.next();
-		File ftemp = File.createTempFile("yaSuoFile_tmp", ".dat");
-		File fn = new File("G:\\javaceshi2.rar");
+	public static void daBaoFrame(Scanner scan) throws IOException {
+		System.out.println("请输入要打包的文件所在的目录名");
+		File fy = new File(scan.next());
+		System.out.println("请输入打包后的文件的存储位置：");
+		File fn = new File(scan.next() + "\\" + fy.getName() + ".dabao");
+		fn.createNewFile();
+		File ftemp = File.createTempFile(fn.getName(), ".tmp",fn.getParentFile());
+		
 		PrintWriter pw = new PrintWriter(ftemp);
-		yaSuo(fy,pw);
+		daBao(fy.listFiles(),pw);
 		pw.close();
 		
-		jiaMi(ftemp,fn);
-		ftemp.deleteOnExit();
-		System.out.println("压缩完成！");
+		jiaMiFile(ftemp,fn);
+		ftemp.delete();
+		System.out.println("打包完成！");
 	}
 	
-	public static void jieYaFrame(Scanner scan) throws NumberFormatException, FileNotFoundException, IOException {
+	public static void jieBaoFrame(Scanner scan) throws NumberFormatException, FileNotFoundException, IOException {
 		File ftemp,fy;
-		String resultPath;
-//		System.out.println("D:\\Java_Project\\Liuxn1.rar");
-		fy = new File("G:\\javaceshi2.rar");
-//		System.out.println("ddd");
-//		resultPath = scan.next();
 
-		ftemp = new File("G:\\javaceshi3.rar");
-		ftemp.createNewFile();
-//		ftemp = File.createTempFile("jieYaFile_tmp", ".dat");
-		jieMi(fy,ftemp);
-		
-		jieYa("G:\\result", new BufferedReader(new FileReader(ftemp)));
-		
-		ftemp.deleteOnExit();
+		System.out.println("请输入要解包的文件名");
+		fy = new File(scan.next());
+		ftemp = File.createTempFile(fy.getName(), ".tmp", fy.getParentFile());
+		jieMiFile(fy,ftemp);//将文件解密
+		System.out.println("请输入解包后的存储路径");
+		jieBao(scan.next(), new BufferedReader(new FileReader(ftemp)));
+		ftemp.delete();//将临时文件删除
+		System.out.println("解包完成！");
 	}
 	//计算文件f的大小
 	public static long fileSize(File f) {
@@ -115,39 +138,98 @@ public class ShiYan4 {
 		
 		return len;
 	}
+
 	
-	//将文件fy加密存储到文件fn中
 	public static void jiaMi(File fy,File fn) throws IOException {
 		fn.mkdirs();//创建目录
 		File fnn;
 		if(fy.isDirectory()){//fy是目录
 			File[] ziMuLu = fy.listFiles();
-			fnn = new File(fn.getAbsolutePath() + "\\" + fy.getName() + "_jm");
+			fnn = new File(fn.getAbsolutePath() + "\\" + fy.getName() + "_jiaMi");
 			for(int i = 0;i < ziMuLu.length;i++){
 				jiaMi(ziMuLu[i],fnn);
 			}
 		}else{//fy是文件
 				
 			
-			FileInputStream  fis = new FileInputStream(fy);
 			String fyName = fy.getName();
 			int dot_index = fyName.indexOf(".");
-			fnn = new File(fn.getAbsolutePath() + "\\" + fyName.substring(0,dot_index) + "_jm" + fyName.substring(dot_index));
+			fnn = new File(fn.getAbsolutePath() + "\\" + fyName.substring(0,dot_index) + "_jiaMi" + fyName.substring(dot_index));
 			fnn.createNewFile();//创建该文件
-			FileOutputStream fos = new FileOutputStream(fnn);
-			
-			int b;
-			while((b = fis.read()) != -1) {
-				fos.write(b + 32);
-			}
-			
-			fos.close();
-			fis.close();
+			jiaMiFile(fy,fnn);
 		}
 	}
+	//加密单文件
+	public static void jiaMiFile(File fy,File fn) throws IOException {
+		FileInputStream  fis = new FileInputStream(fy);
+		FileOutputStream fos = new FileOutputStream(fn);
+		
+		int b;
+		while((b = fis.read()) != -1) {
+			fos.write(b + 32);
+		}
+		
+		fos.close();
+		fis.close();
+	}
+//	//将文件fy加密存储到文件fn中
+//	public static void jiaMi(File fy,File fn) throws IOException {
+//		if(fy.isDirectory()){//fy是目录
+//			File[] ziMuLu = fy.listFiles();
+//			fn = new File(fn.getAbsolutePath() + "\\" + fy.getName() + "_jiaMi");
+//			fn.mkdirs();
+//			for(int i = 0;i < ziMuLu.length;i++){
+//				fn = new File(fn.getAbsolutePath() + "\\" + ziMuLu[i].getName() + "_jiaMi");
+//				jiaMi(ziMuLu[i],fn);
+//			}
+//		}else{//fy是文件
+//				
+//			
+//			FileInputStream  fis = new FileInputStream(fy);
+//			if(!fn.exists()) {
+//				String fnName = fn.getAbsolutePath();
+//				int dot_fn = 0,i;
+//				while((i = fnName.indexOf("\\",dot_fn + 1)) != -1){
+//					dot_fn = i;
+//				}
+//				File fnn = new File(fnName.substring(0, dot_fn));
+//				System.out.println(fnn.getAbsolutePath() + "   " + fn.getAbsolutePath());
+//				fnn.mkdirs();
+//				fn.createNewFile();//创建该文件
+//			}
+//			FileOutputStream fos = new FileOutputStream(fn);
+//			
+//			int b;
+//			while((b = fis.read()) != -1) {
+//				fos.write(b + 32);
+//			}
+//			
+//			fos.close();
+//			fis.close();
+//		}
+//	}
 	
-	//将文件fy解密存储到文件fn中
 	public static void jieMi(File fy,File fn) throws IOException {
+		fn.mkdirs();//创建目录
+		File fnn;
+		if(fy.isDirectory()){//fy是目录
+			File[] ziMuLu = fy.listFiles();
+			fnn = new File(fn.getAbsolutePath() + "\\" + fy.getName() + "_jieMi");
+			for(int i = 0;i < ziMuLu.length;i++){
+				jieMi(ziMuLu[i],fnn);
+			}
+		}else{//fy是文件
+				
+			
+			String fyName = fy.getName();
+			int dot_index = fyName.indexOf(".");
+			fnn = new File(fn.getAbsolutePath() + "\\" + fyName.substring(0,dot_index) + "_jieMi" + fyName.substring(dot_index));
+			fnn.createNewFile();//创建该文件
+			jieMiFile(fy,fnn);
+		}
+	}
+	//解密单文件
+	public static void jieMiFile(File fy,File fn) throws IOException {
 		FileInputStream  fis = new FileInputStream(fy);
 		FileOutputStream fos = new FileOutputStream(fn);
 		
@@ -172,9 +254,9 @@ public class ShiYan4 {
 		String fileName = fy.getName();
 		int dot = fileName.indexOf(".");
 		fileName = fileName.substring(0, dot);//取文件名，不带扩展名
-		String dirName = fileName + "_fenGe";
+		String dirName = fy.getParent() + "\\" + fileName + "_fenGe";
 		File fenGeDir = new File(dirName);
-		fenGeDir.mkdir();
+		fenGeDir.mkdirs();
 		fileName = dirName +  "\\" + fileName;
 		File fn;
 		
@@ -203,13 +285,15 @@ public class ShiYan4 {
 	public static void heBing(File[] fy,File fn) throws IOException {
 		FileInputStream fis;
 		FileOutputStream fos = new FileOutputStream(fn);
-		
+		for(int i = 0;i < fy.length;i++)
+			System.out.println(fy[i].getName());
 		byte[] b = new byte[100];
 		int hasNext = 0;
-		
+		System.out.println(fy.length);
 		for(int i = 0;i < fy.length;i++) {
 			fis = new FileInputStream(fy[i]);
 			hasNext = fis.read(b);
+			System.out.println(i + "  " +hasNext);
 			fos.write(b, 0, hasNext);
 			fis.close();
 		}
@@ -234,23 +318,16 @@ public class ShiYan4 {
 	
 
 	
-	public static void yaSuo(File[] fy,PrintWriter pw) throws IOException {
-//		File ftemp = File.createTempFile("yaSuoFile_tmp", ".dat");//临时文件
-//		PrintWriter pw = new PrintWriter(ftemp);
-		
-		
+	public static void daBao(File[] fy,PrintWriter pw) throws IOException {
 		pw.println(fy.length);
-		System.out.println(fy.length);
 		for(int i = 0;i < fy.length;i++) {
 			//将文件加密 存储到临时文件ftemp中
 			if(fy[i].isDirectory()){
 				pw.println("d");//代表输出的是目录
 				pw.println(fy[i].getName());
-				System.out.println(fy[i].getAbsolutePath());
 				File[] ziMuLu = fy[i].listFiles();
-				yaSuo(ziMuLu,pw);
+				daBao(ziMuLu,pw);
 			}else{
-				System.out.println(fy[i].getAbsolutePath());
 				copyFile2PW(fy[i], pw);
 			}
 			
@@ -263,19 +340,15 @@ public class ShiYan4 {
 	
 
 	//解压  将文件fy解压缩，将文件保存在路径path中
-	public static void jieYa(String path,BufferedReader br) throws NumberFormatException, IOException {
-		String nstr = br.readLine();
-		System.out.println(nstr);
-		int n = Integer.parseInt(nstr);//读取该文件夹中的文件数目
-		String type;
+	public static void jieBao(String path,BufferedReader br) throws NumberFormatException, IOException {
+		int n = Integer.parseInt(br.readLine());//读取该文件夹中的文件数目
 		File[] fn = new File[n];
 		File dir = new File(path);
 		dir.mkdir();//创建该文件夹
 		for(int i = 0;i < n;i++) {
-			type = br.readLine();
-			if(type.equals("d")) {
+			if(br.readLine().equals("d")) {
 				fn[i] = new File(path + "\\" + br.readLine());		
-				jieYa(fn[i].getAbsolutePath(),br);
+				jieBao(fn[i].getAbsolutePath(),br);
 			}else{
 				fn[i] = new File(path + "\\" + br.readLine());
 				fn[i].createNewFile();
@@ -288,7 +361,6 @@ public class ShiYan4 {
 	public static void copyBR2File(BufferedReader br,File fn) throws NumberFormatException, IOException {
 		String data = null;
 		String hasCode = br.readLine();
-		System.out.println(hasCode);
 		PrintWriter pw = new PrintWriter(fn);
 		while(!((data = br.readLine()).equals(hasCode))) {
 			pw.println(data);
